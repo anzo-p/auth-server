@@ -1,4 +1,4 @@
-initialize project
+### Create new TypeScript / NodeJs project
 
 ```
 npm init -y
@@ -22,4 +22,29 @@ npx tsc --init
 
 npm run build
 npm run dev
+```
+
+### Add Policy to access DynamoDb table
+
+```
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Allow",
+			"Action": [
+				"dynamodb:PutItem",
+				"dynamodb:DeleteItem",
+				"dynamodb:GetItem",
+				"dynamodb:Query",
+				"dynamodb:UpdateItem"
+			],
+			"Resource": [
+			    "arn:aws:dynamodb:<region>:<account>:table/auth_server_UserData",
+			    "arn:aws:dynamodb:<region>:<account>:table/auth_server_UserData/index/email-index"
+		    ]
+		}
+	]
+}
 ```
