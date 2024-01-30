@@ -1,9 +1,5 @@
 ## Next
 
-- authenticateController.authenticateUser is too complex for a controller
-
-  - move all non http logic to service
-
 - route /authenticate/:token
 
   - if found, compose User Token

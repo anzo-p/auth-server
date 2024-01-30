@@ -7,8 +7,8 @@ export interface UserData {
   id: string;
   email: string;
   name: string;
-  loginToken?: string;
-  loginTokenExpiration?: number;
+  loginToken?: string | null;
+  loginTokenExpiration?: number | null;
 }
 
 export type MaybeUserData = UserData | null;
