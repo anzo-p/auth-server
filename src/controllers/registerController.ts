@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { v4 as uuidv4 } from 'uuid';
 import { getUserData, saveUser } from '../db/userData';
+import { handleError } from '../helpers/errors';
 import { MaybeUserData, UserData, UserDataInput } from '../models/UserData';
 
 export const registerUser = async (req: Request, res: Response) => {
@@ -25,7 +26,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     return res.status(201).json({ message: 'User created', user: newUser });
   } catch (err) {
-    console.error('Error getting user:', err);
+    handleError(err, 'registerUser');
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

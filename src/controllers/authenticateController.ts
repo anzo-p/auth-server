@@ -4,6 +4,7 @@ import { getUserData } from '../db/userData';
 import { unixEpochToVerbal } from '../helpers/time';
 import { LoginToken } from '../models/LoginToken';
 import { createLoginToken, loginOngoing } from '../services/authenticationService';
+import { handleError } from '../helpers/errors';
 
 export const authenticateUser = async (req: Request, res: Response) => {
   const errors = validationResult(req);
@@ -29,7 +30,8 @@ export const authenticateUser = async (req: Request, res: Response) => {
       uri,
       expiration: unixEpochToVerbal(token.expiration)
     });
-  } catch {
+  } catch (err) {
+    handleError(err, 'authenticateUser');
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

@@ -13,11 +13,12 @@ import { MaybeUserData, UserData } from '../models/UserData';
 import { getDb } from './client';
 import { DynamoDBUserData } from './dbItemMappers';
 import { mapToUserData } from './modelMappers';
+import { assertDefined, handleError } from '../helpers/errors';
 
 dotenv.config();
 
-const userDataTable = process.env.USER_DATA_TABLE;
-const userEmailIndex = process.env.USER_EMAIL_INDEX;
+const userDataTable = assertDefined(process.env.USER_DATA_TABLE);
+const userEmailIndex = assertDefined(process.env.USER_EMAIL_INDEX);
 
 export async function getUserData(email: string): Promise<MaybeUserData> {
   const result = await queryUserData(email);
@@ -31,8 +32,7 @@ export async function getUserData(email: string): Promise<MaybeUserData> {
 export async function saveUser(userData: UserData): Promise<boolean> {
   const user = await queryUserData(userData.email);
   if (user) {
-    console.log('User already exists');
-    return false;
+    throw new Error('Duplicate email for UswrData');
   }
 
   const saveUser: DynamoDBUserData = {
@@ -51,7 +51,7 @@ export async function saveUser(userData: UserData): Promise<boolean> {
     await getDb().send(new PutItemCommand(params));
     return true;
   } catch (err) {
-    console.error('Error saving user:', err);
+    handleError(err, 'saveUser');
     return false;
   }
 }
@@ -73,7 +73,7 @@ export async function saveLoginToken(token: LoginToken): Promise<boolean> {
     await getDb().send(new UpdateItemCommand(params));
     return true;
   } catch (err) {
-    console.error('Error saving login token:', err);
+    handleError(err, 'saveLoginToken');
     return false;
   }
 }
@@ -95,7 +95,7 @@ async function queryUserData(email: string): Promise<Record<string, AttributeVal
     }
     return result;
   } catch (err) {
-    console.error('Error getting user:', err);
+    handleError(err, 'queryUserData');
   }
 
   return null;
