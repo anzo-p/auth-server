@@ -1,3 +1,14 @@
+## Next
+
+- authenticateController.authenticateUser is too complex for a controller
+
+  - move all non http logic to service
+
+- route /authenticate/:token
+
+  - if found, compose User Token
+  - now user token must contain used login mehtods
+
 ### Create new TypeScript / NodeJs project
 
 ```
@@ -41,9 +52,9 @@ npm run dev
 				"dynamodb:UpdateItem"
 			],
 			"Resource": [
-			    "arn:aws:dynamodb:<region>:<account>:table/auth_server_UserData",
-			    "arn:aws:dynamodb:<region>:<account>:table/auth_server_UserData/index/email-index"
-		    ]
+				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData",
+				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData/index/email-index"
+			]
 		}
 	]
 }
