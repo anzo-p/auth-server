@@ -1,5 +1,7 @@
 import {
   AttributeValue,
+  GetItemCommand,
+  GetItemCommandInput,
   PutItemCommand,
   PutItemCommandInput,
   QueryCommand,
@@ -19,9 +21,31 @@ dotenv.config();
 
 const userDataTable = assertDefined(process.env.USER_DATA_TABLE);
 const userEmailIndex = assertDefined(process.env.USER_EMAIL_INDEX);
+const userTokenIndex = assertDefined(process.env.USER_TOKEN_INDEX);
 
-export async function getUserData(email: string): Promise<MaybeUserData> {
-  const result = await queryUserData(email);
+export async function getUserDataById(id: string): Promise<MaybeUserData> {
+  const param: GetItemCommandInput = {
+    TableName: userDataTable,
+    Key: {
+      id: { S: id }
+    }
+  };
+
+  try {
+    const result = (await getDb().send(new GetItemCommand(param))).Item;
+    if (typeof result === 'undefined') {
+      return null;
+    }
+    return mapToUserData(result);
+  } catch (err) {
+    handleError(err, 'getUserDataById');
+  }
+
+  return null;
+}
+
+export async function getUserDataByEmail(email: string): Promise<MaybeUserData> {
+  const result = await queryUserDataByEmail(email);
   if (result != null) {
     return mapToUserData(result);
   } else {
@@ -29,8 +53,31 @@ export async function getUserData(email: string): Promise<MaybeUserData> {
   }
 }
 
-export async function saveUser(userData: UserData): Promise<boolean> {
-  const user = await queryUserData(userData.email);
+export async function getUserDataByToken(token: string): Promise<MaybeUserData> {
+  const params: QueryCommandInput = {
+    TableName: userDataTable,
+    IndexName: userTokenIndex,
+    KeyConditionExpression: 'loginToken = :token',
+    ExpressionAttributeValues: {
+      ':token': { S: token }
+    }
+  };
+
+  try {
+    const result = (await getDb().send(new QueryCommand(params))).Items?.[0];
+    if (typeof result === 'undefined') {
+      return null;
+    }
+    return mapToUserData(result);
+  } catch (err) {
+    handleError(err, 'getUserDataByToken');
+  }
+
+  return null;
+}
+
+export async function saveUser(userData: UserData): Promise<void> {
+  const user = await getUserDataById(userData.id);
   if (user) {
     throw new Error('Duplicate email for UswrData');
   }
@@ -49,14 +96,12 @@ export async function saveUser(userData: UserData): Promise<boolean> {
 
   try {
     await getDb().send(new PutItemCommand(params));
-    return true;
   } catch (err) {
     handleError(err, 'saveUser');
-    return false;
   }
 }
 
-export async function saveLoginToken(token: LoginToken): Promise<boolean> {
+export async function saveLoginToken(token: LoginToken): Promise<void> {
   const params: UpdateItemCommandInput = {
     TableName: userDataTable,
     Key: {
@@ -71,14 +116,32 @@ export async function saveLoginToken(token: LoginToken): Promise<boolean> {
 
   try {
     await getDb().send(new UpdateItemCommand(params));
-    return true;
   } catch (err) {
     handleError(err, 'saveLoginToken');
-    return false;
   }
 }
 
-async function queryUserData(email: string): Promise<Record<string, AttributeValue> | null> {
+export async function saveRefreshToken(userId: string, refreshToken: string, refreshExpiration: number): Promise<void> {
+  const params: UpdateItemCommandInput = {
+    TableName: userDataTable,
+    Key: {
+      id: { S: userId }
+    },
+    UpdateExpression: 'SET refreshToken = :refreshToken, refreshExpiration = :refreshExpiration',
+    ExpressionAttributeValues: {
+      ':refreshToken': { S: refreshToken },
+      ':refreshExpiration': { N: refreshExpiration.toString() }
+    }
+  };
+
+  try {
+    await getDb().send(new UpdateItemCommand(params));
+  } catch (err) {
+    handleError(err, 'saveRefreshToken');
+  }
+}
+
+async function queryUserDataByEmail(email: string): Promise<Record<string, AttributeValue> | null> {
   const params: QueryCommandInput = {
     TableName: userDataTable,
     IndexName: userEmailIndex,

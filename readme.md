@@ -49,7 +49,8 @@ npm run dev
 			],
 			"Resource": [
 				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData",
-				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData/index/email-index"
+				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData/index/email-index",
+				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData/index/loginToken-index"
 			]
 		}
 	]
