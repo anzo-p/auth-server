@@ -1,6 +1,7 @@
 export class ServiceError {
   constructor(public message?: string) {}
 }
+
 export class DuplicateRequest extends ServiceError {}
 export class GoneEntity extends ServiceError {}
 export class InternalError extends ServiceError {}

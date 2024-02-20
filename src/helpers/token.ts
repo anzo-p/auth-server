@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { UserData } from '../models/UserData';
-import { assertDefined, handleError } from './errors';
+import { assertDefined } from './errors';
 import { AuthenticationMethod } from '../models/AuthenticationMethod';
 
 const algorithm = assertDefined(process.env.JWT_ALGORITHM);
@@ -46,8 +46,6 @@ export function unpackToken(payload: string): JwtPayload {
 export function verifyToken(payload: JwtPayload): boolean {
   const { sub } = payload;
   if (typeof sub === 'undefined') {
-    //throw new Error('No sub in JTW');
-    // see if your serviceError works and duplicate for tokenErrors
     return false;
   }
   return true;
@@ -56,17 +54,14 @@ export function verifyToken(payload: JwtPayload): boolean {
 export function validateRefreshToken(user: UserData, payload: JwtPayload, refresh: string): boolean {
   const { refreshToken, refreshExpiration } = user;
   if (!refreshToken || !refreshExpiration) {
-    //throw new Error('No refresh token or expiration');
     return false;
   }
 
   if (refreshExpiration < Math.floor(Date.now() / 1000)) {
-    //throw new Error('Refresh token expired');
     return false;
   }
 
   if (refresh !== refreshToken) {
-    //throw new Error('Refresh token does not match');
     return false;
   }
 

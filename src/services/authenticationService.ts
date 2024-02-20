@@ -15,7 +15,7 @@ import { createUserTokenPayload, signAndPack, unpackToken, verifyToken } from '.
 import { AuthenticationMethod } from '../models/AuthenticationMethod';
 import { LoginToken } from '../models/LoginToken';
 
-export const authenticateByEmail = async (email: string): Promise<ServiceResult> => {
+export const authenticateByEmail = async (host: string, email: string): Promise<ServiceResult> => {
   const user = await getUserDataByEmail(email);
 
   if (!user) {
@@ -36,7 +36,7 @@ export const authenticateByEmail = async (email: string): Promise<ServiceResult>
     await saveLoginToken(token);
     return {
       data: {
-        uri: `http://localhost:3333/api/auth/authenticate?code=${token.loginToken}`,
+        uri: `http://${host}/api/auth/authenticate?code=${token.loginToken}`,
         expiration: unixEpochToVerbal(token.expiration)
       }
     };

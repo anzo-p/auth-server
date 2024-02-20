@@ -1,9 +1,24 @@
-## Next
+## A small express excercise
 
-- route /authenticate/:token
+Register.
 
-  - if found, compose User Token
-  - now user token must contain used login mehtods
+```
+POST ../api/auth/register { email }
+```
+
+Login. Receive magic link. This time in response, would really go to email.
+
+```
+POST ../api/auth/authenticate/get { email } -> magic link
+
+GET <magic link> -> userToken and refreshToken
+```
+
+Refresh authentication automatically in background by Frontend App.
+
+```
+POST ../api/auth/authenticate/refresh { userToken, refreshToken } -> new userToken and refreshToken
+```
 
 ### Create new TypeScript / NodeJs project
 
@@ -31,14 +46,13 @@ npm run build
 npm run dev
 ```
 
-### Add Policy to access DynamoDb table
+### AWS: Requires following policy to use DynamoDb
 
 ```
 {
 	"Version": "2012-10-17",
 	"Statement": [
 		{
-			"Sid": "VisualEditor0",
 			"Effect": "Allow",
 			"Action": [
 				"dynamodb:PutItem",
@@ -48,9 +62,9 @@ npm run dev
 				"dynamodb:UpdateItem"
 			],
 			"Resource": [
-				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData",
-				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData/index/email-index",
-				"arn:aws:dynamodb:eu-west-1:574289728239:table/auth_server_UserData/index/loginToken-index"
+				"arn:aws:dynamodb:<rgion>:<account>:table/auth_server_UserData",
+				"arn:aws:dynamodb:<rgion>:<account>:table/auth_server_UserData/index/email-index",
+				"arn:aws:dynamodb:<rgion>:<account>:table/auth_server_UserData/index/loginToken-index"
 			]
 		}
 	]

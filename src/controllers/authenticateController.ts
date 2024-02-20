@@ -12,7 +12,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
   }
 
   try {
-    const { data, error } = await authenticateByEmail(req.body.email!);
+    const { data, error } = await authenticateByEmail(req.headers.host!, req.body.email!);
 
     if (error) {
       if (error instanceof DuplicateRequest) {
